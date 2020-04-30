@@ -4,7 +4,7 @@ import startCase from 'lodash/startCase';
 import isArray from 'lodash/isArray';
 import { isPageContained } from 'utils/navigation';
 import cx from 'classnames';
-import { GHG_TABLE_HEADER } from 'data/constants';
+import { GHG_TABLE_HEADER, CALCULATION_OPTIONS } from 'data/constants';
 import {
   Chart,
   Multiselect,
@@ -23,6 +23,7 @@ import ModalMetadata from 'components/modal-metadata';
 import ModalShare from 'components/modal-share';
 import { TabletPortraitOnly, TabletLandscape } from 'components/responsive';
 import { toPlural } from 'utils/ghg-emissions';
+import { format } from 'd3-format';
 
 import lineIcon from 'assets/icons/line_chart.svg';
 import areaIcon from 'assets/icons/area_chart.svg';
@@ -193,7 +194,11 @@ function GhgEmissions(props) {
     }
 
     const tableDataReady = !loading && tableData && tableData.length;
-
+    const isPercentageChangeCalculation =
+      selectedOptions.calculationSelected.value ===
+      CALCULATION_OPTIONS.PERCENTAGE_CHANGE.value;
+    const percentageChangeCustomLabelFormat = value =>
+      (value ? `${format('.2r')(value)}` : 0);
     return (
       <React.Fragment>
         <Chart
@@ -211,6 +216,11 @@ function GhgEmissions(props) {
           showUnit
           onLegendChange={v => handleChange(toPlural(fieldToBreakBy), v)}
           hideRemoveOptions={hideRemoveOptions}
+          getCustomYLabelFormat={
+            isPercentageChangeCalculation
+              ? percentageChangeCustomLabelFormat
+              : undefined
+          }
           dataZoomComponent={
             FEATURE_NEW_GHG &&
             !loading && (
